@@ -70,7 +70,14 @@ function! s:handle_arg()
 		let argidx = argidx()
 		exec (argidx+1).'argdelete'
 		exec (argidx)'argadd' fnameescape(fname)
+		exec (argidx).'argument'
 	endif
+endfunction
+
+function! s:handle_tab_page()
+	let winnr=winnr()
+	tabdo windo call s:gotoline()
+	exec winnr . "wincmd w"
 endfunction
 
 function! s:startup()
@@ -80,8 +87,11 @@ function! s:startup()
 	if argc() > 0
 		let argidx=argidx()
 		silent call s:handle_arg()
-		exec (argidx+1).'argument'
-		" Manually call Syntax autocommands, ignored by `:argdo`.
+
+		let tabnr=tabpagenr()
+		tabdo call s:handle_tab_page()
+		exec "normal " . tabnr . "gt"
+
 		doautocmd Syntax
 		doautocmd FileType
 	endif
